@@ -1,0 +1,43 @@
+
+# Python virtual environments
+.venv/
+.venv313/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Personal ORION memory
+python/app/memory.json
+python/app/long_term_memory.json
+
+# Logs
+*.log
+logs/
+
+# IDE
+.idea/
+.vscode/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+
+# Backup files
+*_backup.py
+*_backup.html
+
+# Archives
+*.zip

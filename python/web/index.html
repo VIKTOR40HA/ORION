@@ -1,0 +1,683 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORION AI</title>
+
+    <style>
+        :root {
+            --cyan: #00eaff;
+            --blue: #087cff;
+            --background: #030812;
+            --panel: rgba(5, 20, 38, 0.88);
+            --text: #d8faff;
+            --muted: #6c9bad;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            background:
+                radial-gradient(ellipse at 50% 20%, #092a43 0%, transparent 50%),
+                linear-gradient(135deg, #02050c, #061321 60%, #02050c);
+            font-family: "Segoe UI", Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.18;
+            background-image:
+                linear-gradient(rgba(0, 234, 255, 0.13) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 234, 255, 0.13) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: linear-gradient(to bottom, black, transparent 90%);
+        }
+
+        .app {
+            position: relative;
+            width: min(1100px, 94%);
+            margin: 0 auto;
+            padding: 28px 0 35px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid rgba(0, 234, 255, 0.25);
+            padding-bottom: 18px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 7px;
+            color: var(--cyan);
+            text-shadow: 0 0 18px rgba(0, 234, 255, 0.6);
+        }
+
+        .subtitle {
+            margin-top: 5px;
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--muted);
+        }
+
+        .status {
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--cyan);
+            text-align: right;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 7px;
+            border-radius: 50%;
+            background: #00ff9d;
+            box-shadow: 0 0 10px #00ff9d;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 0.8fr 1.2fr;
+            gap: 22px;
+            margin-top: 25px;
+        }
+
+        .panel {
+            border: 1px solid rgba(0, 234, 255, 0.25);
+            background: var(--panel);
+            box-shadow: 0 0 25px rgba(0, 120, 255, 0.06);
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-heading {
+            padding: 15px 18px;
+            border-bottom: 1px solid rgba(0, 234, 255, 0.18);
+            font-size: 11px;
+            letter-spacing: 3px;
+            color: var(--cyan);
+        }
+
+        .core-panel {
+            min-height: 470px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .core {
+            position: relative;
+            width: 230px;
+            height: 230px;
+            margin: 45px auto 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ring {
+            position: absolute;
+            border: 1px solid rgba(0, 234, 255, 0.65);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(0, 234, 255, 0.12);
+        }
+
+        .ring-one {
+            inset: 0;
+            border-top-color: transparent;
+            border-bottom-color: transparent;
+            animation: rotate 9s linear infinite;
+        }
+
+        .ring-two {
+            inset: 15px;
+            border-left-color: transparent;
+            border-right-color: transparent;
+            animation: rotate 6s linear infinite reverse;
+        }
+
+        .ring-three {
+            inset: 31px;
+            border-style: dashed;
+            animation: rotate 18s linear infinite;
+        }
+
+        .core-center {
+            width: 105px;
+            height: 105px;
+            border-radius: 50%;
+            border: 2px solid var(--cyan);
+            background: radial-gradient(circle, #0d7a9b 0%, #063047 45%, #020812 75%);
+            box-shadow:
+                0 0 25px rgba(0, 234, 255, 0.65),
+                inset 0 0 25px rgba(0, 234, 255, 0.35);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .core-label {
+            text-align: center;
+            font-size: 12px;
+            letter-spacing: 4px;
+            color: var(--cyan);
+        }
+
+        .core-description {
+            margin-top: 9px;
+            text-align: center;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .system-info {
+            width: 100%;
+            padding: 20px;
+            margin-top: auto;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 234, 255, 0.1);
+            font-size: 12px;
+        }
+
+        .info-row span:first-child {
+            color: var(--muted);
+        }
+
+        .info-row span:last-child {
+            color: var(--cyan);
+        }
+
+        .chat-panel {
+            min-height: 470px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #messages {
+            height: 350px;
+            overflow-y: auto;
+            padding: 18px;
+            flex: 1;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 14px;
+            border-left: 2px solid var(--blue);
+            background: rgba(8, 124, 255, 0.08);
+            overflow-wrap: anywhere;
+            line-height: 1.6;
+            font-size: 13px;
+            white-space: pre-wrap;
+        }
+
+        .message.assistant {
+            border-left-color: var(--cyan);
+            background: rgba(0, 234, 255, 0.05);
+        }
+
+        .message-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--cyan);
+        }
+
+        .message.user .message-label {
+            color: #73a9ff;
+        }
+
+        .chat-form {
+            display: flex;
+            gap: 8px;
+            padding: 14px;
+            border-top: 1px solid rgba(0, 234, 255, 0.18);
+        }
+
+        input {
+            flex: 1;
+            min-width: 0;
+            padding: 13px;
+            color: var(--text);
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(0, 234, 255, 0.3);
+            outline: none;
+            font-size: 13px;
+        }
+
+        input:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 234, 255, 0.12);
+        }
+
+        button {
+            padding: 12px 15px;
+            color: var(--cyan);
+            background: rgba(0, 234, 255, 0.06);
+            border: 1px solid rgba(0, 234, 255, 0.45);
+            cursor: pointer;
+            font-size: 10px;
+            letter-spacing: 1px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: rgba(0, 234, 255, 0.17);
+            box-shadow: 0 0 12px rgba(0, 234, 255, 0.15);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .controls button {
+            flex: 1;
+            min-width: 125px;
+        }
+
+        footer {
+            padding-top: 22px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 25px rgba(0, 234, 255, 0.65);
+            }
+            50% {
+                transform: scale(1.06);
+                box-shadow: 0 0 40px rgba(0, 234, 255, 0.9);
+            }
+        }
+
+        @media (max-width: 760px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .core-panel {
+                min-height: 390px;
+            }
+
+            .core {
+                margin-top: 30px;
+                transform: scale(0.85);
+            }
+
+            header {
+                align-items: flex-start;
+            }
+
+            .logo {
+                font-size: 23px;
+                letter-spacing: 5px;
+            }
+
+            .status {
+                font-size: 9px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="app">
+    <header>
+        <div>
+            <div class="logo">ORION</div>
+            <div class="subtitle">PERSONAL AI SYSTEM</div>
+        </div>
+
+        <div class="status">
+            <span class="status-dot"></span>
+            <span id="connection-status">CONNECTING</span>
+        </div>
+    </header>
+
+    <div class="main-grid">
+        <section class="panel core-panel">
+            <div class="panel-heading">NEURAL INTERFACE</div>
+
+            <div class="core">
+                <div class="ring ring-one"></div>
+                <div class="ring ring-two"></div>
+                <div class="ring ring-three"></div>
+                <div class="core-center"></div>
+            </div>
+
+            <div class="core-label">ORION CORE</div>
+            <div class="core-description">PERSONAL ASSISTANT ONLINE</div>
+
+            <div class="system-info">
+                <div class="info-row">
+                    <span>SYSTEM</span>
+                    <span id="system-state">INITIALIZING</span>
+                </div>
+                <div class="info-row">
+                    <span>AI ENGINE</span>
+                    <span>QWEN 2.5</span>
+                </div>
+                <div class="info-row">
+                    <span>VOICE OUTPUT</span>
+                    <span id="voice-state">ENABLED</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel chat-panel">
+            <div class="panel-heading">COMMUNICATION INTERFACE</div>
+
+            <div id="messages" aria-live="polite">
+                <div class="message assistant">
+                    <span class="message-label">ORION</span>
+                    Systems initialized. Hello! I am ORION. How may I assist you?
+                </div>
+            </div>
+
+            <form id="chat-form" class="chat-form">
+                <input
+                    id="message-input"
+                    type="text"
+                    placeholder="Send a message to ORION..."
+                    autocomplete="off"
+                    required
+                >
+                <button id="send-button" type="submit">SEND</button>
+            </form>
+        </section>
+    </div>
+
+    <div class="controls">
+        <button id="status-button" type="button">SYSTEM STATUS</button>
+        <button id="clear-button" type="button">CLEAR SCREEN</button>
+        <button id="voice-button" type="button">VOICE: ON</button>
+        <button id="mic-button" type="button">MIC: START</button>
+    </div>
+
+    <footer>ORION AI · LOCAL ASSISTANT SYSTEM</footer>
+</div>
+
+<script>
+    const messagesContainer = document.getElementById("messages");
+    const chatForm = document.getElementById("chat-form");
+    const messageInput = document.getElementById("message-input");
+    const sendButton = document.getElementById("send-button");
+
+    let voiceEnabled = true;
+    let count = 0;
+
+    function addMessage(text, role) {
+        const message = document.createElement("div");
+        message.className = `message ${role}`;
+
+        const label = document.createElement("span");
+        label.className = "message-label";
+        label.textContent = role === "user" ? "YOU" : "ORION";
+
+        const content = document.createElement("span");
+        content.textContent = text;
+
+        message.appendChild(label);
+        message.appendChild(content);
+        messagesContainer.appendChild(message);
+
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        count++;
+    }
+
+    function speak(text) {
+        if (!voiceEnabled || !("speechSynthesis" in window)) {
+            return;
+        }
+
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "en-US";
+        utterance.rate = 0.95;
+        utterance.pitch = 0.85;
+        utterance.volume = 1;
+
+        const voices = window.speechSynthesis.getVoices();
+
+        const preferredVoice = voices.find(voice =>
+            /en-US/i.test(voice.lang) &&
+            /David|Guy|Christopher|Mark/i.test(voice.name)
+        );
+
+        if (preferredVoice) {
+            utterance.voice = preferredVoice;
+        }
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function toggleVoice() {
+        voiceEnabled = !voiceEnabled;
+
+        const button = document.getElementById("voice-button");
+        button.textContent = voiceEnabled ? "VOICE: ON" : "VOICE: OFF";
+        document.getElementById("voice-state").textContent =
+            voiceEnabled ? "ENABLED" : "DISABLED";
+
+        if (!voiceEnabled && "speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+        }
+    }
+
+    chatForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const message = messageInput.value.trim();
+
+        if (!message) {
+            return;
+        }
+
+        addMessage(message, "user");
+        messageInput.value = "";
+        sendButton.disabled = true;
+        sendButton.textContent = "...";
+
+        try {
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || data.error) {
+                throw new Error(data.error || "The request failed.");
+            }
+
+            const reply = data.reply || "No response received.";
+
+            addMessage(reply, "assistant");
+            speak(reply);
+
+        } catch (error) {
+            const errorMessage =
+                "Connection error: " + error.message;
+
+            addMessage(errorMessage, "assistant");
+            console.error(error);
+
+        } finally {
+            sendButton.disabled = false;
+            sendButton.textContent = "SEND";
+            messageInput.focus();
+        }
+    });
+
+    document.getElementById("clear-button").addEventListener("click", function() {
+        messagesContainer.replaceChildren();
+        count = 0;
+
+        if ("speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+        }
+    });
+
+    document.getElementById("voice-button").addEventListener(
+        "click",
+        toggleVoice
+    );
+
+
+const micButton = document.getElementById("mic-button");
+
+const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+let recognition = null;
+let isListening = false;
+
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = function() {
+        isListening = true;
+        micButton.textContent = "MIC: LISTENING...";
+    };
+
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        messageInput.value = transcript;
+
+        // Send the recognized speech to ORION.
+        chatForm.requestSubmit();
+    };
+
+    recognition.onerror = function(event) {
+        console.error("Microphone error:", event.error);
+
+        if (event.error === "not-allowed") {
+            addMessage(
+                "Microphone access denied. Allow microphone access in your browser.",
+                "assistant"
+            );
+        } else if (event.error !== "no-speech" && event.error !== "aborted") {
+            addMessage(
+                "Microphone error: " + event.error,
+                "assistant"
+            );
+        }
+    };
+
+    recognition.onend = function() {
+        isListening = false;
+        micButton.textContent = "MIC: START";
+    };
+
+    micButton.addEventListener("click", function() {
+        if (isListening) {
+            recognition.stop();
+            return;
+        }
+
+        try {
+            recognition.start();
+        } catch (error) {
+            console.error("Could not start microphone:", error);
+        }
+    });
+} else {
+    micButton.textContent = "MIC: UNSUPPORTED";
+    micButton.disabled = true;
+    micButton.title =
+        "Speech recognition is not supported by this browser.";
+}
+
+
+    document.getElementById("status-button").addEventListener("click", async function() {
+        try {
+            const response = await fetch("/health");
+            const data = await response.json();
+
+            const statusText = data.status === "ok"
+                ? "All systems operational."
+                : "System status requires attention.";
+
+            addMessage(statusText, "assistant");
+            speak(statusText);
+
+        } catch (error) {
+            addMessage("Unable to reach the ORION server.", "assistant");
+        }
+    });
+
+    async function checkConnection() {
+        try {
+            const response = await fetch("/health");
+
+            if (!response.ok) {
+                throw new Error("Server unavailable");
+            }
+
+            document.getElementById("connection-status").textContent = "ONLINE";
+            document.getElementById("system-state").textContent = "OPERATIONAL";
+
+        } catch (error) {
+            document.getElementById("connection-status").textContent = "OFFLINE";
+            document.getElementById("system-state").textContent = "DISCONNECTED";
+        }
+    }
+
+    if ("speechSynthesis" in window) {
+        window.speechSynthesis.getVoices();
+    } else {
+        voiceEnabled = false;
+        document.getElementById("voice-button").textContent = "VOICE: UNSUPPORTED";
+        document.getElementById("voice-button").disabled = true;
+        document.getElementById("voice-state").textContent = "UNAVAILABLE";
+    }
+
+    checkConnection();
+</script>
+</body>
+</html>
